@@ -66,9 +66,6 @@ void ErrorPrint(ErrorType Error)
 
 size_t GetDataHash(stack * stk)
 {
-    stk->DataHashVal = 0;
-    stk->StackHashVal = 0;
-
     size_t NewDataHash = 0;
 
     size_t power = base;
@@ -117,7 +114,6 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
         return;
     }
 
-    printf("\n\n----------DUMPING STACK----------\n\n");
     printf("Dump was called in file %s, in function %s, on line %d\n", DumpCallFlile, DumpCallFunction, DumpCallLine);
 
     printf("Dumping stack %s (was created in file %s, in function %s, on line %d)\n\n\n",
@@ -327,17 +323,7 @@ int main()
 
     stack MyStack;
 
-
-
     Error = STACKINIT(&MyStack, 5);
-    printf("%d\n", Error);
-    printf("%zu\n", MyStack.StackHashVal);
-    printf("%zu\n", GetStackHash(&MyStack));
-
-
-    DUMP(&MyStack);
-
-    ErrorPrint(StackCheck(&MyStack));
 
     DUMP(&MyStack);
 
@@ -346,7 +332,7 @@ int main()
         Error = StackPush(&MyStack, i*i);
     }
 
-    // MyStack.data[1] = 4;
+    MyStack.data[1] = 4;
     DUMP(&MyStack);
 
 //     int value = 0;
