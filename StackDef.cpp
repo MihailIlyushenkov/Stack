@@ -17,11 +17,11 @@ enum ErrorType
     SizeAndCapacityOvercrossing = 4,
     DestroyedStack = 5,
     InvalidStackCapacity = 6,
-    InvalidHash = 7,
-    LeftCanaryDead = 8,
-    RightCanaryDead = 9
+    InvalidDataHash = 7,
+    InvalidStackHash = 8,
+    LeftCanaryDead = 9,
+    RightCanaryDead = 10
 };
-
 
 struct stack
 {
@@ -36,7 +36,8 @@ struct stack
     size_t size = 0;
     size_t capacity = 0;
 
-    size_t HashVal = 0;
+    size_t StackHashVal = 0;
+    size_t DataHashVal = 0;
 
     void* rightcanary = 0;
 };
@@ -54,7 +55,8 @@ void ErrorPrint(ErrorType Error)
     case SizeAndCapacityOvercrossing: printf("This stack has SizeAndCapacityOvercrossing error (code is %d)", SizeAndCapacityOvercrossing); break;
     case DestroyedStack: printf("This is destroyed stack (code is %d)", DestroyedStack);
     case InvalidStackCapacity: printf("This stack has InvalidStackCapacity error (code is %d)", InvalidStackCapacity); break;
-    case InvalidHash: printf("This stack has InvalidHash error (code is %d)", InvalidHash); break;
+    case InvalidStackHash: printf("This stack has InvalidStackHash error (code is %d)", InvalidStackHash); break;
+    case InvalidDataHash: printf("This stack has InvalidStackHash error (code is %d)", InvalidDataHash); break;
     case LeftCanaryDead: printf("This stack has LeftCanaryDead error (code is %d)", LeftCanaryDead); break;
     case RightCanaryDead: printf("This stack has LeftCanaryDead error (code is %d)", RightCanaryDead); break;
 
@@ -62,35 +64,52 @@ void ErrorPrint(ErrorType Error)
     }
 }
 
-size_t HashFunc(stack * stk)
+size_t GetDataHash(stack * stk)
 {
-    size_t a = 0;
-    size_t OldHash = stk->HashVal;
+    stk->DataHashVal = 0;
+    stk->StackHashVal = 0;
 
-    stk->HashVal = 0;
+    size_t NewDataHash = 0;
 
-    size_t NewHash = 0;
+    size_t power = base;
+
+    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t); i++)
+    {
+        NewDataHash = (NewDataHash + (*i)*power)%mod;
+        power = (power * base)%mod;
+    }
+
+    return NewDataHash;
+}
+
+size_t GetStackHash(stack * stk)
+{
+    size_t OldStackHash = stk->StackHashVal;
+    size_t OldDataHash = stk->DataHashVal;
+
+    stk->StackHashVal = 0;
+    stk->DataHashVal = 0;
+
+    size_t NewStackHash = 0;
+
     size_t power = base;
 
     for (char* i = (char*) stk; i < ((char*) stk) + 80; i++)
     {
-        NewHash = (NewHash + (*i)*power)%mod;
+        NewStackHash = (NewStackHash + (*i)*power)%mod;
         power = (power * base)%mod;
     }
 
-    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t); i++)
-    {
-        NewHash = (NewHash + (*i)*power)%mod;
-        power = (power * base)%mod;
-    }
+    stk->StackHashVal = OldStackHash;
+    stk->DataHashVal = OldDataHash;
 
-    stk -> HashVal = OldHash;
-
-    return NewHash;
+    return NewStackHash;
 }
 
 void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, int DumpCallLine)
 {
+
+    printf("\n\n----------DUMPING STACK----------\n\n");
 
     if (StackCheck(stk) != 0)
     {
@@ -117,7 +136,8 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
     printf("(%p) size is %zu\n", &(stk->size), stk->size);
     printf("(%p) capacity is %zu\n\n", &(stk->capacity), stk->capacity);
 
-    printf("(%p) Hash value is %zu\n", &(stk->HashVal), stk->HashVal);
+    printf("(%p) Hash (stack) value is %zu\n", &(stk->StackHashVal), stk->StackHashVal);
+    printf("(%p) Hash (data) value is %zu\n", &(stk->DataHashVal), stk->DataHashVal);
 
     printf("(%p) right canary is %p\n", &(stk->rightcanary), stk->rightcanary);
 
@@ -144,19 +164,25 @@ ErrorType StackCheck(stack * stk)
         return VoidStack;
     }
 
+    else if ((stk ->capacity == -1) && (stk->data == 0))
+    {
+        return DestroyedStack;
+    }
+
     else if (stk->data == 0)
     {
         return VoidStackData;
     }
 
-    else if (stk->HashVal != HashFunc(stk))
+    else if (stk->StackHashVal != GetStackHash(stk))
     {
-        return InvalidHash;
+        printf("old is %zu, new is %zu\n", stk->StackHashVal, GetStackHash(stk));
+        return InvalidStackHash;
     }
 
-    else if ((stk ->capacity == -1) || (stk->data == 0))
+    else if (stk->DataHashVal != GetDataHash(stk))
     {
-        return DestroyedStack;
+        return InvalidDataHash;
     }
 
     else if (stk->capacity < stk->size)
@@ -166,12 +192,12 @@ ErrorType StackCheck(stack * stk)
 
     else if (stk->leftcanary != &(stk->leftcanary))
     {
-        return LeftCanaryError;
+        return LeftCanaryDead;
     }
 
     else if (stk->rightcanary != &(stk->rightcanary))
     {
-        return RightCanaryError;
+        return RightCanaryDead;
     }
 
     return NoError;
@@ -207,7 +233,10 @@ ErrorType StackCtor(stack * stk, size_t capacity, const char* stackname, const c
     stk->rightcanary = &(stk->rightcanary);
     stk->leftcanary = &(stk->leftcanary);
 
-    stk->HashVal = HashFunc(stk);
+    stk->StackHashVal = GetStackHash(stk);
+    printf("stack hash in init is %zu\n", stk->StackHashVal);
+    printf("stack hash function value in init is %zu\n", GetStackHash(stk));
+    stk->DataHashVal = GetDataHash(stk);
 
     return NoError;
 }
@@ -222,9 +251,23 @@ ErrorType StackDtor(stack * stk)
     }
 
     free(stk -> data);
+
+    stk -> leftcanary = 0;
+
+    stk -> stackname = 0;
+    stk -> filename = 0;
+    stk -> funcname = 0;
+    stk -> line = 0;
+
     stk -> data = 0;
     stk -> size = 0;
     stk -> capacity = 0;
+
+    stk -> StackHashVal = 0;
+    stk -> DataHashVal = 0;
+
+    stk -> rightcanary = 0;
+
     return NoError;
 }
 
@@ -254,7 +297,8 @@ ErrorType StackPush (stack * stk, elem_t value)
     stk->data[stk->size] = value;
     stk->size = stk->size + 1;
 
-    stk->HashVal = HashFunc(stk);
+    stk->StackHashVal = GetStackHash(stk);
+    stk->DataHashVal = GetDataHash(stk);
 
     return NoError;
 }
@@ -271,7 +315,8 @@ ErrorType StackPop(stack * stk, elem_t* value)
     (stk->data)[stk->size - 1] = 0;
     stk->size = stk->size - 1;
 
-    stk->HashVal = HashFunc(stk);
+    stk->DataHashVal = GetDataHash(stk);
+    stk->StackHashVal = GetStackHash(stk);
 
     return NoError;
 }
@@ -282,18 +327,28 @@ int main()
 
     stack MyStack;
 
-    DUMP(0);
-//     Error = STACKINIT(&MyStack, 5);
-//
-//     DUMP(&MyStack);
-//
-//     for (int i = 0; i < 4; i++)
-//     {
-//         Error = StackPush(&MyStack, i*i);
-//     }
-//
-//     DUMP(&MyStack);
-//
+
+
+    Error = STACKINIT(&MyStack, 5);
+    printf("%d\n", Error);
+    printf("%zu\n", MyStack.StackHashVal);
+    printf("%zu\n", GetStackHash(&MyStack));
+
+
+    DUMP(&MyStack);
+
+    ErrorPrint(StackCheck(&MyStack));
+
+    DUMP(&MyStack);
+
+    for (int i = 0; (i < 4) && (Error == 0); i++)
+    {
+        Error = StackPush(&MyStack, i*i);
+    }
+
+    // MyStack.data[1] = 4;
+    DUMP(&MyStack);
+
 //     int value = 0;
 //     while (MyStack.size > 0)
 //     {
