@@ -1,48 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-typedef double elem_t;
-
-const int base = 31, mod = 1e9+7;
-
-#define DUMP(stk) dump((stk), __FILE__, __func__, __LINE__)
-#define STACKINIT(stk, capacity) StackCtor(stk, capacity, #stk, __FILE__, __func__, __LINE__)
-
-enum ErrorType
-{
-    NoError = 0,
-    VoidStack = 1,
-    InvalidMemoryInitiallisation = 2,
-    VoidStackData = 3,
-    SizeAndCapacityOvercrossing = 4,
-    DestroyedStack = 5,
-    InvalidStackCapacity = 6,
-    InvalidDataHash = 7,
-    InvalidStackHash = 8,
-    LeftCanaryDead = 9,
-    RightCanaryDead = 10
-};
-
-struct stack
-{
-    void* leftcanary = 0;
-
-    const char* stackname = 0;
-    const char* filename = 0;
-    const char* funcname = 0;
-    size_t line = 0;
-
-    elem_t * data = 0;
-    size_t size = 0;
-    size_t capacity = 0;
-
-    size_t StackHashVal = 0;
-    size_t DataHashVal = 0;
-
-    void* rightcanary = 0;
-};
-
-ErrorType StackCheck(stack * stk);
+#include "StackDef.h"
 
 void ErrorPrint(ErrorType Error)
 {
@@ -317,10 +273,15 @@ ErrorType StackPop(stack * stk, elem_t* value)
     return NoError;
 }
 
+
+
+
 zabebrit(stack * stk)
 {
-    char* p = (char*) stk + 80;
-    *p = 0;
+    elem_t* p = (stk->data) + (stk->capacity);
+    *p = 66;
+
+    return 0;
 }
 
 int main()
