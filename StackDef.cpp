@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-typedef int elem_t;
+typedef double elem_t;
 
 const int base = 31, mod = 1e9+7;
 
@@ -58,7 +58,7 @@ void ErrorPrint(ErrorType Error)
     case InvalidStackHash: printf("This stack has InvalidStackHash error (code is %d)", InvalidStackHash); break;
     case InvalidDataHash: printf("This stack has InvalidStackHash error (code is %d)", InvalidDataHash); break;
     case LeftCanaryDead: printf("This stack has LeftCanaryDead error (code is %d)", LeftCanaryDead); break;
-    case RightCanaryDead: printf("This stack has LeftCanaryDead error (code is %d)", RightCanaryDead); break;
+    case RightCanaryDead: printf("This stack has RightCanaryDead error (code is %d)", RightCanaryDead); break;
 
     default: printf("Unexpected input value for ErrorPrint function"); break;
     }
@@ -149,7 +149,7 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
             postfix = "(void)";
         }
 
-        printf("%s[%zu]%s = %d\n", prefix, j, postfix, *(stk->data + j));
+        printf("%s[%zu]%s = %lf\n", prefix, j, postfix, *(stk->data + j));
     }
 }
 
@@ -317,6 +317,12 @@ ErrorType StackPop(stack * stk, elem_t* value)
     return NoError;
 }
 
+zabebrit(stack * stk)
+{
+    char* p = (char*) stk + 80;
+    *p = 0;
+}
+
 int main()
 {
     ErrorType Error = NoError;
@@ -327,19 +333,21 @@ int main()
 
     DUMP(&MyStack);
 
-    for (int i = 0; (i < 4) && (Error == 0); i++)
+    for (double i = 0; (i < 15) && (Error == 0); i++)
     {
         Error = StackPush(&MyStack, i*i);
     }
 
-    MyStack.data[1] = 4;
+    printf("%d", Error);
+    zabebrit(&MyStack);
     DUMP(&MyStack);
 
-//     int value = 0;
-//     while (MyStack.size > 0)
-//     {
-//         StackPop(&MyStack, &value);
-//         printf("Poped value is %d\n", value);
-//     }
-//     DUMP(&MyStack);
+    elem_t value = 0;
+
+    while ((MyStack.size > 0) && (Error != 0))
+    {
+        Error = StackPop(&MyStack, &value);
+        printf("Poped value is %d\n", value);
+    }
+    DUMP(&MyStack);
 }
