@@ -26,9 +26,9 @@ size_t GetDataHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);)
+    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t); i)
     {
-        NewDataHash = (NewDataHash + (*(i++))*power)%mod;
+        NewDataHash = (NewDataHash + (*i++)*power)%mod;
         power = (power * base)%mod;
     }
 
@@ -186,8 +186,7 @@ ErrorType StackCtor(stack * stk, size_t capacity, const char* stackname, const c
     stk->leftcanary = &(stk->leftcanary);
 
     stk->StackHashVal = GetStackHash(stk);
-    printf("stack hash in init is %zu\n", stk->StackHashVal);
-    printf("stack hash function value in init is %zu\n", GetStackHash(stk));
+
     stk->DataHashVal = GetDataHash(stk);
 
     return NoError;
@@ -274,22 +273,17 @@ ErrorType StackPop(stack * stk, elem_t* value)
 }
 
 
-
-
-zabebrit(stack * stk)
-{
-    elem_t* p = (stk->data) + (stk->capacity);
-    *p = 66;
-
-    return 0;
-}
-
 int main()
 {
     ErrorType Error = NoError;
 
     stack MyStack;
 
+    Error = STACKINIT(&MyStack, 5);
+    Error = STACKINIT(&MyStack, 5);
+    Error = STACKINIT(&MyStack, 5);
+    Error = STACKINIT(&MyStack, 5);
+    Error = STACKINIT(&MyStack, 5);
     Error = STACKINIT(&MyStack, 5);
 
     DUMP(&MyStack);
@@ -300,7 +294,6 @@ int main()
     }
 
     printf("%d", Error);
-    zabebrit(&MyStack);
     DUMP(&MyStack);
 
     elem_t value = 0;
