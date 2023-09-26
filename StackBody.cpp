@@ -26,9 +26,9 @@ size_t GetDataHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);)
+    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);i++)
     {
-        NewDataHash = (NewDataHash + (*i++)*power)%mod;
+        NewDataHash = (NewDataHash + (*i)*power)%mod;
         power = (power * base)%mod;
     }
 
@@ -47,7 +47,7 @@ size_t GetStackHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk; i <= ((char*) stk) + 80; i++)
+    for (char* i = (char*) stk; i < ((char*) stk) + 80; i++)
     {
         NewStackHash = (NewStackHash + (*i)*power)%mod;
         power = (power * base)%mod;
