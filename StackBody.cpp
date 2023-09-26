@@ -26,7 +26,7 @@ size_t GetDataHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t); i)
+    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);)
     {
         NewDataHash = (NewDataHash + (*i++)*power)%mod;
         power = (power * base)%mod;
@@ -72,7 +72,7 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
 
     printf("Dump was called in file %s, in function %s, on line %d\n", DumpCallFlile, DumpCallFunction, DumpCallLine);
 
-    printf("Dumping stack %s (was created in file %s, in function %s, on line %d)\n\n\n",
+    printf("Dumping stack %s (was created in file %s, in function %s, on line %zu)\n\n\n",
                                         stk->stackname, stk->filename, stk->funcname, stk->line);
 
     printf("stack pointer is %p\n\n", stk);
@@ -82,7 +82,7 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
     printf("(%p) stackname is %s\n", &(stk->stackname), stk->stackname);
     printf("(%p) filename is %s\n", &(stk->filename), stk->filename);
     printf("(%p) funcname is %s\n", &(stk->funcname), stk->funcname);
-    printf("(%p) (creation) line is %d\n\n", &(stk->line), stk->line);
+    printf("(%p) (creation) line is %zu\n\n", &(stk->line), stk->line);
 
     printf("(%p) data pointer is %p\n", &(stk->data), stk->data);
     printf("(%p) size is %zu\n", &(stk->size), stk->size);
@@ -275,15 +275,11 @@ ErrorType StackPop(stack * stk, elem_t* value)
 
 int main()
 {
+
     ErrorType Error = NoError;
 
     stack MyStack;
 
-    Error = STACKINIT(&MyStack, 5);
-    Error = STACKINIT(&MyStack, 5);
-    Error = STACKINIT(&MyStack, 5);
-    Error = STACKINIT(&MyStack, 5);
-    Error = STACKINIT(&MyStack, 5);
     Error = STACKINIT(&MyStack, 5);
 
     DUMP(&MyStack);

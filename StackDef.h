@@ -48,7 +48,6 @@ void ErrorPrint(ErrorType Error);
 size_t GetDataHash(stack * stk);
 size_t GetStackHash(stack * stk);
 void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, int DumpCallLine);
-ErrorType StackCheck(stack * stk);
 ErrorType StackCtor(stack * stk, size_t capacity, const char* stackname, const char* filename, const char* funcname, int linenumb);
 ErrorType StackDtor(stack * stk);
 ErrorType StackPush (stack * stk, elem_t value);
