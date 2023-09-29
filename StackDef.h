@@ -23,7 +23,6 @@ enum ErrorType
     RightCanaryDead = 10
 };
 
-
 struct stack
 {
     void* leftcanary = 0;

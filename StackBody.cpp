@@ -1,5 +1,8 @@
 #include "StackDef.h"
 
+
+
+
 void ErrorPrint(ErrorType Error)
 {
     switch (Error)
@@ -26,9 +29,9 @@ size_t GetDataHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);i++)
+    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);)
     {
-        NewDataHash = (NewDataHash + (*i)*power)%mod;
+        NewDataHash = (NewDataHash + (*(++i))*power)%mod;
         power = (power * base)%mod;
     }
 
@@ -47,7 +50,7 @@ size_t GetStackHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk; i < ((char*) stk) + 80; i++)
+    for (char* i = (char*) stk; i =< ((char*) stk) + 80; i++)
     {
         NewStackHash = (NewStackHash + (*i)*power)%mod;
         power = (power * base)%mod;
@@ -273,9 +276,11 @@ ErrorType StackPop(stack * stk, elem_t* value)
 }
 
 
+
+#include "StackDef.h"
+
 int main()
 {
-
     ErrorType Error = NoError;
 
     stack MyStack;
@@ -290,14 +295,12 @@ int main()
     }
 
     printf("%d", Error);
+
+    // MyStack.capacity = 7;
+
     DUMP(&MyStack);
 
     elem_t value = 0;
 
-    while ((MyStack.size > 0) && (Error != 0))
-    {
-        Error = StackPop(&MyStack, &value);
-        printf("Poped value is %d\n", value);
-    }
     DUMP(&MyStack);
 }
