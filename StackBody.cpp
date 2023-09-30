@@ -1,7 +1,28 @@
 #include "StackDef.h"
 
+struct stack
+{
+    void* leftcanary = 0;
+
+    const char* stackname = 0;
+    const char* filename = 0;
+    const char* funcname = 0;
+    size_t line = 0;
+
+    elem_t * data = 0;
+    size_t size = 0;
+    size_t capacity = 0;
+
+    size_t StackHashVal = 0;
+    size_t DataHashVal = 0;
+
+    void* rightcanary = 0;
+};
 
 
+void ErrorPrint(ErrorType Error);
+size_t GetDataHash(stack * stk);
+size_t GetStackHash(stack * stk);
 
 void ErrorPrint(ErrorType Error)
 {
@@ -12,7 +33,7 @@ void ErrorPrint(ErrorType Error)
     case InvalidMemoryInitiallisation: printf("This stack has InvalidMemoryInitiallisation error (code is %d)", InvalidMemoryInitiallisation); break;
     case VoidStackData: printf("This stack has VoidStackData error (code is %d)", VoidStackData); break;
     case SizeAndCapacityOvercrossing: printf("This stack has SizeAndCapacityOvercrossing error (code is %d)", SizeAndCapacityOvercrossing); break;
-    case DestroyedStack: printf("This is destroyed stack (code is %d)", DestroyedStack);
+    case DestroyedStack: printf("This is destroyed stack (code is %d)", DestroyedStack); break;
     case InvalidStackCapacity: printf("This stack has InvalidStackCapacity error (code is %d)", InvalidStackCapacity); break;
     case InvalidStackHash: printf("This stack has InvalidStackHash error (code is %d)", InvalidStackHash); break;
     case InvalidDataHash: printf("This stack has InvalidStackHash error (code is %d)", InvalidDataHash); break;
@@ -50,7 +71,7 @@ size_t GetStackHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk; i =< ((char*) stk) + 80; i++)
+    for (char* i = (char*) stk; i <= ((char*) stk) + sizeof(stack); i++)
     {
         NewStackHash = (NewStackHash + (*i)*power)%mod;
         power = (power * base)%mod;
@@ -75,7 +96,7 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
 
     printf("Dump was called in file %s, in function %s, on line %d\n", DumpCallFlile, DumpCallFunction, DumpCallLine);
 
-    printf("Dumping stack %s (was created in file %s, in function %s, on line %zu)\n\n\n",
+    printf("Dumping stack %s (was created in file %s, in function %s, on line %llu)\n\n\n",
                                         stk->stackname, stk->filename, stk->funcname, stk->line);
 
     printf("stack pointer is %p\n\n", stk);
@@ -85,14 +106,14 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
     printf("(%p) stackname is %s\n", &(stk->stackname), stk->stackname);
     printf("(%p) filename is %s\n", &(stk->filename), stk->filename);
     printf("(%p) funcname is %s\n", &(stk->funcname), stk->funcname);
-    printf("(%p) (creation) line is %zu\n\n", &(stk->line), stk->line);
+    printf("(%p) (creation) line is %llu\n\n", &(stk->line), stk->line);
 
     printf("(%p) data pointer is %p\n", &(stk->data), stk->data);
-    printf("(%p) size is %zu\n", &(stk->size), stk->size);
-    printf("(%p) capacity is %zu\n\n", &(stk->capacity), stk->capacity);
+    printf("(%p) size is %llu\n", &(stk->size), stk->size);
+    printf("(%p) capacity is %llu\n\n", &(stk->capacity), stk->capacity);
 
-    printf("(%p) Hash (stack) value is %zu\n", &(stk->StackHashVal), stk->StackHashVal);
-    printf("(%p) Hash (data) value is %zu\n", &(stk->DataHashVal), stk->DataHashVal);
+    printf("(%p) Hash (stack) value is %llu\n", &(stk->StackHashVal), stk->StackHashVal);
+    printf("(%p) Hash (data) value is %llu\n", &(stk->DataHashVal), stk->DataHashVal);
 
     printf("(%p) right canary is %p\n", &(stk->rightcanary), stk->rightcanary);
 
@@ -108,7 +129,7 @@ void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, 
             postfix = "(void)";
         }
 
-        printf("%s[%zu]%s = %lf\n", prefix, j, postfix, *(stk->data + j));
+        printf("%s[%llu]%s = %lf\n", prefix, j, postfix, *(stk->data + j));
     }
 }
 
@@ -131,7 +152,7 @@ ErrorType StackCheck(stack * stk)
 
     else if (stk->StackHashVal != GetStackHash(stk))
     {
-        printf("old is %zu, new is %zu\n", stk->StackHashVal, GetStackHash(stk));
+        printf("old is %llu, new is %llu\n", stk->StackHashVal, GetStackHash(stk));
         return InvalidStackHash;
     }
 
@@ -236,7 +257,7 @@ ErrorType StackPush (stack * stk, elem_t value)
     if ( (stk -> capacity) == (stk -> size))
     {
 
-        printf("reallocating stack, old capacity is %zu, new capacity is %zu\n", stk->capacity, (stk->capacity)*2);
+        printf("reallocating stack, old capacity is %llu, new capacity is %llu\n", stk->capacity, (stk->capacity)*2);
 
         elem_t* newptr = (elem_t*) realloc(stk -> data, (stk->capacity)*2*sizeof(elem_t));
         stk -> data = newptr;
@@ -275,32 +296,8 @@ ErrorType StackPop(stack * stk, elem_t* value)
     return NoError;
 }
 
-
-
-#include "StackDef.h"
-
-int main()
+stack* MakeStack(stack * a)
 {
-    ErrorType Error = NoError;
-
-    stack MyStack;
-
-    Error = STACKINIT(&MyStack, 5);
-
-    DUMP(&MyStack);
-
-    for (double i = 0; (i < 15) && (Error == 0); i++)
-    {
-        Error = StackPush(&MyStack, i*i);
-    }
-
-    printf("%d", Error);
-
-    // MyStack.capacity = 7;
-
-    DUMP(&MyStack);
-
-    elem_t value = 0;
-
-    DUMP(&MyStack);
+    a = (stack*) calloc(1, sizeof(stack));
+    return a;
 }
