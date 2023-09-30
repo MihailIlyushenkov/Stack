@@ -31,7 +31,7 @@ ErrorType StackCheck(stack * stk);
 void dump(stack * stk, const char* DumpCallFlile, const char* DumpCallFunction, int DumpCallLine);
 
 
-stack* MakeStack(stack * a);
+stack* MakeStack();
 
 ErrorType StackCtor(stack * stk, size_t capacity, const char* stackname, const char* filename, const char* funcname, int linenumb);
 ErrorType StackDtor(stack * stk);

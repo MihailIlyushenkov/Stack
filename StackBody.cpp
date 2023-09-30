@@ -50,9 +50,9 @@ size_t GetDataHash(stack * stk)
 
     size_t power = base;
 
-    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);)
+    for (char* i = (char*) stk->data; i < ((char*) stk->data) + (stk->capacity)*sizeof(elem_t);i++)
     {
-        NewDataHash = (NewDataHash + (*(++i))*power)%mod;
+        NewDataHash = (NewDataHash + (*i)*power)%mod;
         power = (power * base)%mod;
     }
 
@@ -296,8 +296,8 @@ ErrorType StackPop(stack * stk, elem_t* value)
     return NoError;
 }
 
-stack* MakeStack(stack * a)
+stack* MakeStack()
 {
-    a = (stack*) calloc(1, sizeof(stack));
+    stack* a = (stack*) calloc(1, sizeof(stack));
     return a;
 }

@@ -6,8 +6,7 @@ int main()
     ErrorType Error = NoError;
 
     stack* MyStack;
-    MakeStack(MyStack);
-
+    MyStack = MakeStack();
     Error = STACKINIT(MyStack, 5);
 
     DUMP(MyStack);
@@ -17,9 +16,19 @@ int main()
         Error = StackPush(MyStack, i*i);
     }
 
-    printf("%d", Error);
+    printf("Error is %d\n", Error);
+    DUMP(MyStack);
 
-    //MyStack->capacity = 7;
+    double a = 0;
+
+    for (int i = 0; (i < 7) && (Error == 0); i++)
+    {
+        Error = StackPop(MyStack, &a);
+        printf("poped value is %lf\n", a);
+    }
 
     DUMP(MyStack);
+
+    return 0;
 }
+
